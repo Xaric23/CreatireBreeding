@@ -23,8 +23,9 @@ This guide will help you build and run the CreatireBreeding game as an Android a
    - Required for building and running Android apps
    - Includes Android SDK and tools
 
-3. **Java Development Kit (JDK)** 17 or higher
-   - Usually installed with Android Studio
+3. **Java Development Kit (JDK) 21**
+   - Required for Capacitor 7.4.4+
+   - Usually installed with Android Studio, or download from https://adoptium.net/temurin/releases/?version=21
    - Verify installation: `java --version`
 
 ### Android Studio Setup
