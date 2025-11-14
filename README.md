@@ -164,9 +164,26 @@ The project includes GitHub Actions workflows for automated APK building:
 - **Manual triggers**: Build debug or release APKs on-demand from the Actions tab
 
 ### Release Automation
+- **Create releases**: Use the "Create Release" workflow to automatically create GitHub releases
 - **Automatic release builds**: When you create a GitHub release, an APK is automatically built and attached
 - **APK signing**: Configure secrets for automatic APK signing in releases
 - **Versioned naming**: APKs are named with the release version (e.g., `CreatireBreeding-v1.0.0.apk`)
+
+### Creating a Release
+**Option 1: Via GitHub Actions (Recommended)**
+1. Go to the [Actions tab](https://github.com/Xaric23/CreatireBreeding/actions)
+2. Select "Create Release" workflow
+3. Click "Run workflow"
+4. Enter version number (e.g., `1.0.0`)
+5. Click "Run workflow"
+6. The release and APK will be created automatically
+
+**Option 2: Via Git Tag**
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+The release will be created automatically with the APK attached.
 
 ### How to Get Pre-Built APKs
 1. **From Releases**: Go to [Releases](https://github.com/Xaric23/CreatireBreeding/releases) and download the APK
