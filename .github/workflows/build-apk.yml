@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     
     permissions:
-      contents: read
+      contents: write
       actions: read
     
     steps:
@@ -115,3 +115,65 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Download the APK from the workflow artifacts above." >> $GITHUB_STEP_SUMMARY
+      
+      - name: Generate version for release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: version
+        run: |
+          # Generate version based on date and build number
+          DATE=$(date +%Y.%m.%d)
+          BUILD_NUMBER=${{ github.run_number }}
+          VERSION="${DATE}.${BUILD_NUMBER}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v${VERSION}" >> $GITHUB_OUTPUT
+      
+      - name: Rename APK for release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p release_output
+          if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            cp android/app/build/outputs/apk/debug/app-debug.apk \
+               release_output/CreatireBreeding-${{ steps.version.outputs.version }}-debug.apk
+          fi
+      
+      - name: Create Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.version }}
+          body: |
+            ## Automated Build Release
+            
+            This release was automatically created from a successful build on the main branch.
+            
+            **Build Information:**
+            - Commit: ${{ github.sha }}
+            - Build Number: ${{ github.run_number }}
+            - Date: ${{ steps.version.outputs.version }}
+            
+            **Download:**
+            - APK file is attached below
+            
+            **Installation:**
+            1. Download the APK file
+            2. Enable "Install from Unknown Sources" on your Android device
+            3. Install the APK
+          draft: false
+          prerelease: false
+          files: release_output/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Release Summary
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Release Created!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** ${{ steps.version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View the release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY

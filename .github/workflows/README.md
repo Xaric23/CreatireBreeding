@@ -4,7 +4,39 @@ This directory contains automated workflows for building the CreatireBreeding An
 
 ## Available Workflows
 
-### 1. Build Android APK (`build-apk.yml`)
+### 1. Create Release (`create-release.yml`)
+
+**Purpose:** Creates a GitHub release with a version tag, which automatically triggers the APK build.
+
+**Triggers:**
+- Manual trigger via "Actions" tab (with version input)
+- Push of version tags (e.g., `v1.0.0`)
+
+**What it does:**
+1. Creates a version tag (if triggered manually)
+2. Generates release notes from commits
+3. Creates a GitHub release
+4. Automatically triggers the Release Build workflow
+
+**How to create a release manually:**
+1. Go to "Actions" tab
+2. Select "Create Release"
+3. Click "Run workflow"
+4. Enter version number (e.g., `1.0.0`)
+5. Optionally mark as pre-release
+6. Click "Run workflow"
+7. The release will be created and APK will be built automatically
+
+**How to create a release via tag:**
+1. Create and push a version tag:
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+2. The workflow runs automatically
+3. Release is created with the APK attached
+
+### 2. Build Android APK (`build-apk.yml`)
 
 **Purpose:** Automatically builds the Android APK on push and pull requests.
 
@@ -20,6 +52,14 @@ This directory contains automated workflows for building the CreatireBreeding An
 4. Syncs with Android using Capacitor
 5. Builds the debug APK (or release if manually triggered)
 6. Uploads the APK as a workflow artifact
+7. **NEW:** Automatically creates a GitHub release with the APK when pushed to `main` branch
+
+**Automatic Releases:**
+When code is pushed to the `main` branch, the workflow will:
+- Generate a version number based on date and build number (e.g., `2025.11.14.42`)
+- Create a GitHub release with that version
+- Attach the built APK to the release
+- Users can download directly from the Releases page
 
 **Artifacts:**
 - `app-debug-apk`: Debug APK (kept for 30 days)
@@ -39,7 +79,7 @@ This directory contains automated workflows for building the CreatireBreeding An
 4. Choose "debug" or "release"
 5. Click "Run workflow"
 
-### 2. Release Build (`release-build.yml`)
+### 3. Release Build (`release-build.yml`)
 
 **Purpose:** Automatically builds and attaches APK to GitHub releases.
 
