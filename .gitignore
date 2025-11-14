@@ -7,6 +7,18 @@ yarn.lock
 dist/
 build/
 
+# Android/Capacitor (keep source but ignore builds)
+android/.gradle/
+android/.idea/
+android/build/
+android/app/build/
+android/local.properties
+android/*.iml
+android/.cxx/
+android/captures/
+*.apk
+*.aab
+
 # Python cache
 __pycache__/
 *.pyc
