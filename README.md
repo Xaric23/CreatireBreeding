@@ -1,55 +1,180 @@
-# CreatireBreeding
+# CreatireBreeding - 3D Creature Breeding Game
 
-A simple creature breeding simulation system that allows you to create creatures with unique traits and breed them to produce offspring with inherited characteristics.
+A fully interactive 3D creature breeding and evolution game built with Three.js and TypeScript. Create unique creatures with procedurally generated appearances, breed them to combine traits, and watch them evolve across generations.
 
-## Features
+![3D Creature Breeding Game](https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 
-- Create creatures with customizable attributes (species, color, size, strength, intelligence)
-- Breed two creatures to produce offspring
-- Genetic trait inheritance system
-- Random mutations during breeding
-- Display creature information and family trees
+## ✨ Features
 
-## Installation
+### Core Features
+- **🎨 Procedural 3D Generation**: Creatures are dynamically generated with unique body parts, colors, and patterns
+- **🧬 Genetic System**: Complex trait inheritance with mutations for size, speed, stamina, colors, and body proportions
+- **🔄 Breeding Mechanics**: Combine two creatures to create offspring with blended traits
+- **🌍 3D Environment**: Fully navigable 3D world with terrain, trees, rocks, and dynamic day/night cycle
+- **🤖 AI Behavior**: Autonomous creature movement influenced by behavioral traits (curiosity, aggression, social)
+- **💾 Save/Load System**: Persistent game state using browser local storage
+- **🎮 Interactive UI**: Click-to-select creatures, breeding controls, and population statistics
 
-No external dependencies required - uses Python 3.6+
+### Creature Traits
+- **Physical**: Size, speed, stamina
+- **Visual**: Body color, accent color, pattern type (spots, stripes, spikes)
+- **Proportions**: Head size, body length, limb length
+- **Behavioral**: Aggression, curiosity, social tendency
 
-## Usage
+## 🚀 Quick Start
 
-```python
-from creature_breeding import Creature, breed_creatures
+### Prerequisites
+- Node.js 16+ and npm
 
-# Create parent creatures
-parent1 = Creature(name="Dragon", species="Dragon", color="Red", size=10, strength=8, intelligence=7)
-parent2 = Creature(name="Drake", species="Dragon", color="Blue", size=9, strength=7, intelligence=8)
-
-# Breed creatures
-offspring = breed_creatures(parent1, parent2)
-
-# Display offspring information
-print(offspring)
-```
-
-## Running the Demo
+### Installation
 
 ```bash
-python demo.py
+# Clone the repository
+git clone https://github.com/Xaric23/CreatireBreeding.git
+cd CreatireBreeding
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-## Project Structure
+The game will automatically open in your browser at `http://localhost:3000`
 
-- `creature_breeding.py` - Core creature and breeding logic
-- `demo.py` - Example usage and demonstration
-- `README.md` - This file
+### Build for Production
 
-## How Breeding Works
+```bash
+npm run build
+npm run preview
+```
 
-1. Offspring inherits traits from both parents
-2. Each trait has a 50% chance of coming from either parent
-3. Small random mutations can occur (±10% variation)
-4. Offspring name is generated from parent names
-5. Species is inherited from parents (must be same species to breed)
+## 🎮 How to Play
 
-## License
+### Controls
+- **Mouse Drag**: Rotate camera view
+- **Mouse Scroll**: Zoom in/out
+- **Click Creature**: Select for breeding (max 2)
 
-MIT License
+### Gameplay
+
+1. **Create Creatures**: Click "Create Random Creature" to spawn new creatures with random traits
+2. **Select Parents**: Click on two creatures in the 3D world to select them for breeding
+3. **Breed**: Click "Breed Selected Creatures" to create offspring
+4. **Observe**: Watch creatures move autonomously based on their behavioral traits
+5. **Save Progress**: Click "Save Game" to persist your population
+6. **Load Game**: Reload your saved creatures at any time
+
+### Breeding Rules
+- Parents must have sufficient energy (>50%)
+- Cannot breed with direct parents or offspring
+- Offspring inherit averaged traits with small random mutations
+- Colors may blend (e.g., Red + Blue = Purple)
+
+## 📁 Project Structure
+
+```
+CreatireBreeding/
+├── src/
+│   ├── core/              # Core systems
+│   │   ├── Genetics.ts    # Genetic trait system
+│   │   └── SaveLoadManager.ts  # Save/load functionality
+│   ├── creatures/         # Creature-related code
+│   │   ├── Creature.ts    # Creature class with 3D mesh
+│   │   └── BreedingManager.ts  # Breeding logic
+│   ├── world/             # Environment and world
+│   │   └── Environment.ts # 3D scene, terrain, lighting
+│   ├── ui/                # User interface
+│   │   └── UIManager.ts   # UI controls and updates
+│   └── main.ts            # Application entry point
+├── public/                # Static assets
+├── index.html            # HTML entry point
+├── tsconfig.json         # TypeScript configuration
+├── vite.config.ts        # Vite build configuration
+└── package.json          # Dependencies and scripts
+```
+
+## 🛠️ Technical Details
+
+### Technologies
+- **Three.js** (v0.181+): 3D graphics rendering
+- **TypeScript** (v5.9+): Type-safe development
+- **Vite** (v7.2+): Fast build tool and dev server
+
+### Architecture
+
+#### Genetics System (`src/core/Genetics.ts`)
+Manages trait generation and inheritance with realistic genetic algorithms:
+- Random trait generation for first-generation creatures
+- Mendelian-inspired trait inheritance
+- Mutation system for evolutionary variation
+- Color blending with RGB interpolation
+
+#### Creature Class (`src/creatures/Creature.ts`)
+Each creature is a self-contained entity with:
+- Procedural 3D mesh generation based on genetic traits
+- Autonomous AI behavior and pathfinding
+- Energy system affecting movement and breeding
+- Serializable data for save/load
+
+#### Breeding System (`src/creatures/BreedingManager.ts`)
+Handles reproduction logic:
+- Validation of breeding compatibility
+- Trait combination algorithms
+- Energy cost for breeding
+- Parent-offspring relationship tracking
+
+#### Environment (`src/world/Environment.ts`)
+Creates the 3D world:
+- Procedural terrain with height variation
+- Dynamic lighting with day/night cycle
+- Decorative elements (trees, rocks)
+- Atmospheric effects and fog
+
+#### Save/Load System (`src/core/SaveLoadManager.ts`)
+Persistent game state:
+- JSON serialization of creature data
+- Browser localStorage integration
+- Import/export functionality
+- Version compatibility checking
+
+## 🎯 Future Enhancements
+
+### Planned Features
+- [ ] Evolution simulation mode (autonomous multi-generation evolution)
+- [ ] Creature naming system
+- [ ] Feeding and habitat management
+- [ ] Multiple biomes with different environments
+- [ ] Creature stats visualization (charts/graphs)
+- [ ] Multiplayer breeding pool
+- [ ] Achievement system
+- [ ] Sound effects and music
+
+## 🐛 Known Issues
+
+- Creatures may occasionally overlap when spawned
+- Camera controls can be sensitive on some devices
+- Large populations (100+) may impact performance
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [Three.js](https://threejs.org/) - Amazing 3D library
+- Inspired by creature breeding mechanics from games like Spore and Pokémon
+- Genetic algorithms based on real-world heredity principles
+
+## 📧 Contact
+
+For questions or suggestions, please open an issue on GitHub.
+
+---
+
+**Enjoy breeding your creatures! 🧬🎮**
