@@ -110,8 +110,17 @@ class Game {
     // Window resize
     window.addEventListener('resize', () => this.onWindowResize());
     
-    // Mouse click for creature selection
+    // Mouse/Touch click for creature selection
     window.addEventListener('click', (event) => this.onMouseClick(event));
+    window.addEventListener('touchend', (event) => {
+      // Prevent default to avoid double-firing on mobile
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+      // Convert touch to click-like event
+      const touch = event.changedTouches[0];
+      this.onMouseClick(touch as any);
+    });
     
     // Mouse move for hover effects
     window.addEventListener('mousemove', (event) => this.onMouseMove(event));
