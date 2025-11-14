@@ -160,6 +160,7 @@ The project includes GitHub Actions workflows for automated APK building:
 
 ### Continuous Integration
 - **Auto-build on push**: APKs are automatically built when code is pushed to `main` or `develop`
+- **Auto-release on main**: When code is pushed to `main`, a GitHub release is automatically created with the APK attached
 - **Pull Request builds**: APKs are built for all pull requests
 - **Manual triggers**: Build debug or release APKs on-demand from the Actions tab
 
@@ -186,7 +187,7 @@ git push origin v1.0.0
 The release will be created automatically with the APK attached.
 
 ### How to Get Pre-Built APKs
-1. **From Releases**: Go to [Releases](https://github.com/Xaric23/CreatireBreeding/releases) and download the APK
+1. **From Releases (Recommended)**: Go to [Releases](https://github.com/Xaric23/CreatireBreeding/releases) and download the latest APK - automatically created on every push to main!
 2. **From Actions**: Go to [Actions](https://github.com/Xaric23/CreatireBreeding/actions), select a workflow run, and download artifacts
 3. **Build Manually**: Trigger a workflow run from the Actions tab
 

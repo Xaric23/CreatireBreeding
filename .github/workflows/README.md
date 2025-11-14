@@ -52,6 +52,14 @@ This directory contains automated workflows for building the CreatireBreeding An
 4. Syncs with Android using Capacitor
 5. Builds the debug APK (or release if manually triggered)
 6. Uploads the APK as a workflow artifact
+7. **NEW:** Automatically creates a GitHub release with the APK when pushed to `main` branch
+
+**Automatic Releases:**
+When code is pushed to the `main` branch, the workflow will:
+- Generate a version number based on date and build number (e.g., `2025.11.14.42`)
+- Create a GitHub release with that version
+- Attach the built APK to the release
+- Users can download directly from the Releases page
 
 **Artifacts:**
 - `app-debug-apk`: Debug APK (kept for 30 days)
