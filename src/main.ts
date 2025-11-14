@@ -113,13 +113,19 @@ class Game {
     // Mouse/Touch click for creature selection
     window.addEventListener('click', (event) => this.onMouseClick(event));
     window.addEventListener('touchend', (event) => {
-      // Prevent default to avoid double-firing on mobile
-      if (event.cancelable) {
+      // Check if touch is on a button or UI element
+      const target = event.target as HTMLElement;
+      const isButton = target.tagName === 'BUTTON' || target.closest('button');
+      const isUIElement = target.closest('.ui-panel');
+      
+      // Only prevent default for canvas touches (not UI elements)
+      // This allows buttons to work on mobile
+      if (event.cancelable && !isButton && !isUIElement) {
         event.preventDefault();
+        // Convert touch to click-like event for creature selection
+        const touch = event.changedTouches[0];
+        this.onMouseClick(touch as any);
       }
-      // Convert touch to click-like event
-      const touch = event.changedTouches[0];
-      this.onMouseClick(touch as any);
     });
     
     // Mouse move for hover effects
