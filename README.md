@@ -22,6 +22,16 @@ A fully interactive 3D creature breeding and evolution game built with Three.js 
 - **🎮 Interactive UI**: Click/touch-to-select creatures, breeding controls, and population statistics
 - **📱 Android Support**: Native Android app with touch controls via Capacitor
 
+### Advanced Features (NEW!)
+- **🧪 Evolution Simulator**: Autonomous multi-generation evolution with configurable speed and natural selection
+- **🍖 Feeding System**: Food automatically spawns across the map, creatures eat to restore energy
+- **🏞️ Multiple Biomes**: Four distinct biomes (Grassland, Desert, Forest, Snow) with unique environments
+- **📊 Stats Visualization**: Real-time charts and graphs showing trait distributions and population trends
+- **🏆 Achievement System**: 10 achievements to unlock tracking various milestones
+- **🎵 Audio System**: Background music and sound effects for all major actions
+- **🌐 Multiplayer Pool**: Export and import breeding pools to share creatures with other players
+- **✏️ Creature Naming**: Auto-generated unique names for each creature
+
 ### Creature Traits
 - **Physical**: Size, speed, stamina
 - **Visual**: Body color, accent color, pattern type (spots, stripes, spikes)
@@ -50,6 +60,8 @@ npm run dev
 ```
 
 The game will automatically open in your browser at `http://localhost:3000`
+
+**🌐 Play Online**: Visit the live version at [https://xaric23.github.io/CreatireBreeding](https://xaric23.github.io/CreatireBreeding)
 
 #### Build for Production
 
@@ -100,11 +112,13 @@ See [ANDROID_BUILD.md](ANDROID_BUILD.md) for detailed instructions.
 - **Mouse Drag**: Rotate camera view
 - **Mouse Scroll**: Zoom in/out
 - **Click Creature**: Select for breeding (max 2)
+- **UI Buttons**: Access all game features
 
 **Mobile/Android:**
 - **Touch & Drag**: Rotate camera view
 - **Pinch**: Zoom in/out
 - **Tap Creature**: Select for breeding (max 2)
+- **UI Buttons**: Access all game features
 
 ### Gameplay
 
@@ -112,14 +126,37 @@ See [ANDROID_BUILD.md](ANDROID_BUILD.md) for detailed instructions.
 2. **Select Parents**: Click on two creatures in the 3D world to select them for breeding
 3. **Breed**: Click "Breed Selected Creatures" to create offspring
 4. **Observe**: Watch creatures move autonomously based on their behavioral traits
-5. **Save Progress**: Click "Save Game" to persist your population
-6. **Load Game**: Reload your saved creatures at any time
+5. **Feed**: Creatures automatically eat green food orbs to restore energy
+6. **Evolve**: Enable evolution mode to automate breeding across generations
+7. **Change Biomes**: Switch between Grassland, Desert, Forest, and Snow biomes
+8. **View Stats**: Toggle statistics to see population trends and trait distributions
+9. **Earn Achievements**: Unlock achievements by reaching various milestones
+10. **Share**: Export your breeding pool to share with other players
+11. **Save Progress**: Click "Save Game" to persist your population
 
 ### Breeding Rules
 - Parents must have sufficient energy (>50%)
 - Cannot breed with direct parents or offspring
 - Offspring inherit averaged traits with small random mutations
 - Colors may blend (e.g., Red + Blue = Purple)
+
+### Evolution Mode
+- Automatically breeds creatures when population is below target
+- Configurable speed (generations per minute)
+- Optional natural selection removes weakest creatures
+- Great for observing long-term evolution trends
+
+### Achievements
+- **First Steps**: Create your first creature
+- **Breeder**: Successfully breed two creatures
+- **Growing Family**: Reach a population of 10 creatures
+- **Thriving Colony**: Reach a population of 25 creatures
+- **Generational**: Breed a 5th generation creature
+- **Dynasty**: Breed a 10th generation creature
+- **Rainbow Breeder**: Have creatures of 5 different colors
+- **Speed Demon**: Breed a creature with speed > 0.9
+- **Giant**: Breed a creature with size > 1.5
+- **Prepared**: Save your game
 
 ## 📁 Project Structure
 
@@ -128,19 +165,30 @@ CreatireBreeding/
 ├── src/                     # TypeScript source code
 │   ├── core/               # Core systems
 │   │   ├── Genetics.ts     # Genetic trait system
-│   │   └── SaveLoadManager.ts  # Save/load functionality
+│   │   ├── SaveLoadManager.ts  # Save/load functionality
+│   │   ├── EvolutionSimulator.ts  # Evolution automation
+│   │   ├── AchievementManager.ts  # Achievement tracking
+│   │   ├── AudioManager.ts  # Sound effects and music
+│   │   └── MultiplayerPoolManager.ts  # Import/export breeding pools
 │   ├── creatures/          # Creature-related code
 │   │   ├── Creature.ts     # Creature class with 3D mesh
 │   │   └── BreedingManager.ts  # Breeding logic
 │   ├── world/              # Environment and world
-│   │   └── Environment.ts  # 3D scene, terrain, lighting
+│   │   ├── Environment.ts  # 3D scene, terrain, lighting
+│   │   ├── BiomeManager.ts  # Biome switching system
+│   │   └── FoodManager.ts  # Food spawning and feeding
 │   ├── ui/                 # User interface
-│   │   └── UIManager.ts    # UI controls and updates
+│   │   ├── UIManager.ts    # UI controls and updates
+│   │   └── StatsVisualizer.ts  # Charts and statistics
 │   └── main.ts             # Application entry point
 ├── android/                # Android app (generated by Capacitor)
 │   └── app/               # Android source and resources
 ├── .github/                # GitHub Actions workflows
-│   └── workflows/         # Automated build workflows
+│   └── workflows/         # Automated build and deployment
+│       ├── build-apk.yml  # Android APK build
+│       ├── create-release.yml  # Release automation
+│       ├── release-build.yml  # Release APK build
+│       └── deploy-pages.yml  # GitHub Pages deployment
 ├── public/                 # Static assets
 ├── dist/                   # Build output (generated)
 ├── index.html             # HTML entry point
@@ -156,13 +204,18 @@ CreatireBreeding/
 
 ## 🤖 Automated Builds
 
-The project includes GitHub Actions workflows for automated APK building:
+The project includes GitHub Actions workflows for automated builds and deployment:
 
 ### Continuous Integration
 - **Auto-build on push**: APKs are automatically built when code is pushed to `main` or `develop`
 - **Auto-release on main**: When code is pushed to `main`, a GitHub release is automatically created with the APK attached
 - **Pull Request builds**: APKs are built for all pull requests
 - **Manual triggers**: Build debug or release APKs on-demand from the Actions tab
+
+### GitHub Pages Deployment
+- **Auto-deploy**: The web version is automatically deployed to GitHub Pages when code is pushed to `main`
+- **Live URL**: Visit [https://xaric23.github.io/CreatireBreeding](https://xaric23.github.io/CreatireBreeding) to play online
+- **Manual triggers**: Deploy manually from the Actions tab if needed
 
 ### Release Automation
 - **Create releases**: Use the "Create Release" workflow to automatically create GitHub releases
@@ -238,17 +291,60 @@ Persistent game state:
 - Import/export functionality
 - Version compatibility checking
 
+#### Evolution Simulator (`src/core/EvolutionSimulator.ts`)
+Automated evolution system:
+- Configurable auto-breeding speed
+- Population management
+- Natural selection option
+- Multi-generation simulation
+
+#### Food Manager (`src/world/FoodManager.ts`)
+Feeding mechanics:
+- Periodic food spawning
+- Automatic feeding when creatures are nearby
+- Energy restoration system
+
+#### Biome Manager (`src/world/BiomeManager.ts`)
+Multiple environment types:
+- Four distinct biomes (Grassland, Desert, Forest, Snow)
+- Dynamic environment switching
+- Biome-specific colors and decorations
+
+#### Achievement System (`src/core/AchievementManager.ts`)
+Player progression tracking:
+- 10 unique achievements
+- Persistent progress storage
+- Unlock notifications
+
+#### Audio Manager (`src/core/AudioManager.ts`)
+Sound system:
+- Web Audio API implementation
+- Background music with melody loops
+- Sound effects for all major actions
+- Toggleable music and SFX
+
+#### Stats Visualizer (`src/ui/StatsVisualizer.ts`)
+Data visualization:
+- ASCII art charts for trait distributions
+- Generation distribution charts
+- Population statistics
+- Real-time updates
+
+#### Multiplayer Pool (`src/core/MultiplayerPoolManager.ts`)
+Breeding pool sharing:
+- Export creatures as JSON
+- Import creatures from other players
+- Automatic ID conflict resolution
+- Version compatibility checking
+
 ## 🎯 Future Enhancements
 
-### Planned Features
-- [ ] Evolution simulation mode (autonomous multi-generation evolution)
-- [ ] Creature naming system
-- [ ] Feeding and habitat management
-- [ ] Multiple biomes with different environments
-- [ ] Creature stats visualization (charts/graphs)
-- [ ] Multiplayer breeding pool
-- [ ] Achievement system
-- [ ] Sound effects and music
+All planned features have been implemented! Possible future additions:
+- [ ] More biome types
+- [ ] Additional achievements
+- [ ] Advanced trait visualizations
+- [ ] Creature combat system
+- [ ] Territory/nesting mechanics
 
 ## 🐛 Known Issues
 
