@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  base: '/CreatireBreeding/',
   root: '.',
   publicDir: 'public',
   build: {
