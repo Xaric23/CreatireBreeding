@@ -12,6 +12,12 @@ import { BreedingManager } from './creatures/BreedingManager';
 import { Environment } from './world/Environment';
 import { UIManager } from './ui/UIManager';
 import { SaveLoadManager } from './core/SaveLoadManager';
+import { EvolutionSimulator } from './core/EvolutionSimulator';
+import { FoodManager } from './world/FoodManager';
+import { BiomeManager, BiomeType } from './world/BiomeManager';
+import { AchievementManager } from './core/AchievementManager';
+import { AudioManager } from './core/AudioManager';
+import { MultiplayerPoolManager } from './core/MultiplayerPoolManager';
 
 class Game {
   private renderer: THREE.WebGLRenderer;
@@ -23,6 +29,11 @@ class Game {
   private raycaster: THREE.Raycaster;
   private mouse: THREE.Vector2;
   private clock: THREE.Clock;
+  private evolutionSimulator: EvolutionSimulator;
+  private foodManager: FoodManager;
+  private biomeManager: BiomeManager;
+  private achievementManager: AchievementManager;
+  private audioManager: AudioManager;
   
   constructor() {
     // Initialize Three.js
@@ -37,9 +48,22 @@ class Game {
     this.mouse = new THREE.Vector2();
     this.clock = new THREE.Clock();
     
+    // Initialize new systems
+    this.evolutionSimulator = new EvolutionSimulator();
+    this.foodManager = new FoodManager(this.environment.scene);
+    this.biomeManager = new BiomeManager(this.environment.scene);
+    this.achievementManager = new AchievementManager();
+    this.audioManager = new AudioManager();
+    
     // Set up event listeners
     this.setupEventListeners();
     this.setupUICallbacks();
+    this.setupAchievementCallbacks();
+    
+    // Initialize audio on first user interaction
+    document.addEventListener('click', () => {
+      this.audioManager.initialize();
+    }, { once: true });
     
     // Try to load saved game
     if (SaveLoadManager.hasSaveFile()) {
@@ -141,6 +165,25 @@ class Game {
     this.uiManager.onSave(() => this.saveGame());
     this.uiManager.onLoad(() => this.loadGame());
     this.uiManager.onReset(() => this.resetGame());
+    this.uiManager.onEvolutionToggle(() => this.toggleEvolution());
+    this.uiManager.onBiomeChange((biome) => this.changeBiome(biome));
+    this.uiManager.onMusicToggle(() => this.toggleMusic());
+    this.uiManager.onSfxToggle(() => this.toggleSfx());
+    this.uiManager.onExportPool(() => this.exportPool());
+    this.uiManager.onImportPool(() => this.importPool());
+  }
+  
+  /**
+   * Set up achievement callbacks
+   */
+  private setupAchievementCallbacks(): void {
+    this.achievementManager.onUnlock((achievement) => {
+      this.uiManager.showNotification(`Achievement Unlocked: ${achievement.name}!`, 'success');
+      this.audioManager.playAchievementSound();
+    });
+    
+    // Update UI with initial achievements
+    this.uiManager.updateAchievements(this.achievementManager.getAchievements());
   }
   
   /**
@@ -159,6 +202,7 @@ class Game {
     const creature = new Creature();
     this.addCreature(creature);
     this.uiManager.showNotification(`Created ${creature.name}!`, 'success');
+    this.audioManager.playCreationSound();
   }
   
   /**
@@ -167,22 +211,30 @@ class Game {
   private addCreature(creature: Creature): void {
     this.creatures.push(creature);
     this.environment.scene.add(creature.mesh);
-    this.uiManager.updatePopulationStats(this.creatures);
+    this.updateGameState();
   }
   
   /**
-   * Remove a creature from the game (for future use)
+   * Remove a creature from the game
    */
-  /*
   private removeCreature(creature: Creature): void {
     const index = this.creatures.indexOf(creature);
     if (index !== -1) {
       this.creatures.splice(index, 1);
       this.environment.scene.remove(creature.mesh);
-      this.uiManager.updatePopulationStats(this.creatures);
+      this.updateGameState();
     }
   }
-  */
+  
+  /**
+   * Update all game state displays
+   */
+  private updateGameState(): void {
+    this.uiManager.updatePopulationStats(this.creatures);
+    this.uiManager.updateStatsCharts(this.creatures);
+    this.achievementManager.checkAchievements(this.creatures);
+    this.uiManager.updateAchievements(this.achievementManager.getAchievements());
+  }
   
   /**
    * Breed two creatures
@@ -192,6 +244,7 @@ class Game {
       if (!BreedingManager.canBreed(creature1, creature2)) {
         const status = BreedingManager.getBreedingStatus(creature1, creature2);
         this.uiManager.showNotification(status, 'error');
+        this.audioManager.playErrorSound();
         return;
       }
       
@@ -202,11 +255,14 @@ class Game {
         `${creature1.name} and ${creature2.name} created ${offspring.name}!`,
         'success'
       );
+      this.audioManager.playBreedingSound();
+      this.achievementManager.unlock('first_breed');
     } catch (error) {
       this.uiManager.showNotification(
         error instanceof Error ? error.message : 'Breeding failed',
         'error'
       );
+      this.audioManager.playErrorSound();
     }
   }
   
@@ -219,8 +275,10 @@ class Game {
     
     if (success) {
       this.uiManager.showNotification('Game saved successfully!', 'success');
+      this.achievementManager.unlock('save_game');
     } else {
       this.uiManager.showNotification('Failed to save game', 'error');
+      this.audioManager.playErrorSound();
     }
   }
   
@@ -269,11 +327,101 @@ class Game {
     // Delete save
     SaveLoadManager.deleteSave();
     
+    // Reset systems
+    this.evolutionSimulator.reset();
+    this.foodManager.clear();
+    
     // Create new default creatures
     this.initializeDefaultCreatures();
     
     this.uiManager.clearSelection();
     this.uiManager.showNotification('Game reset!', 'info');
+  }
+  
+  /**
+   * Toggle evolution simulation
+   */
+  private toggleEvolution(): void {
+    const config = this.evolutionSimulator.getConfig();
+    config.enabled = !config.enabled;
+    this.evolutionSimulator.setConfig(config);
+    this.uiManager.updateEvolutionButton(config.enabled);
+    
+    if (config.enabled) {
+      this.uiManager.showNotification('Evolution simulation started', 'info');
+    } else {
+      this.uiManager.showNotification('Evolution simulation stopped', 'info');
+    }
+  }
+  
+  /**
+   * Change biome
+   */
+  private changeBiome(biomeType: BiomeType): void {
+    const ambientLight = this.environment.scene.children.find(
+      child => child instanceof THREE.AmbientLight
+    ) as THREE.AmbientLight;
+    
+    this.biomeManager.switchBiome(biomeType, this.environment.ground, ambientLight);
+    this.uiManager.showNotification(`Switched to ${biomeType} biome`, 'success');
+  }
+  
+  /**
+   * Toggle music
+   */
+  private toggleMusic(): void {
+    this.audioManager.toggleMusic();
+    const config = this.audioManager.getConfig();
+    this.uiManager.updateMusicButton(config.musicEnabled);
+    
+    if (config.musicEnabled && config.enabled) {
+      this.audioManager.playBackgroundMusic();
+    }
+  }
+  
+  /**
+   * Toggle sound effects
+   */
+  private toggleSfx(): void {
+    this.audioManager.toggleSfx();
+    const config = this.audioManager.getConfig();
+    this.uiManager.updateSfxButton(config.sfxEnabled);
+  }
+  
+  /**
+   * Export breeding pool
+   */
+  private exportPool(): void {
+    const creatureData = this.creatures.map(c => c.toData());
+    MultiplayerPoolManager.downloadPool(creatureData);
+    this.uiManager.showNotification('Breeding pool exported!', 'success');
+  }
+  
+  /**
+   * Import breeding pool
+   */
+  private importPool(): void {
+    MultiplayerPoolManager.uploadPool((data) => {
+      if (data && data.creatures) {
+        const currentData = this.creatures.map(c => c.toData());
+        const merged = MultiplayerPoolManager.mergeCreatures(currentData, data.creatures, 10);
+        
+        // Add imported creatures
+        const importCount = merged.length - currentData.length;
+        for (let i = currentData.length; i < merged.length; i++) {
+          const creature = new Creature(merged[i]);
+          this.addCreature(creature);
+        }
+        
+        this.uiManager.showNotification(
+          `Imported ${importCount} creatures from ${data.exportedBy}`,
+          'success'
+        );
+      } else {
+        this.uiManager.showNotification('Failed to import breeding pool', 'error');
+        this.audioManager.playErrorSound();
+      }
+    });
   }
   
   /**
@@ -354,6 +502,17 @@ class Game {
     this.creatures.forEach(creature => {
       creature.update(deltaTime);
     });
+    
+    // Update evolution simulator
+    this.evolutionSimulator.update(
+      deltaTime,
+      this.creatures,
+      (c1, c2) => this.breedCreatures(c1, c2),
+      (c) => this.removeCreature(c)
+    );
+    
+    // Update food system
+    this.foodManager.update(deltaTime, this.creatures);
     
     // Update controls
     this.controls.update();

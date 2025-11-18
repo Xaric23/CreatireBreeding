@@ -5,6 +5,8 @@
  */
 
 import { Creature } from '../creatures/Creature';
+import { StatsVisualizer } from './StatsVisualizer';
+import { BiomeType } from '../world/BiomeManager';
 
 export class UIManager {
   private selectedCreatures: Creature[] = [];
@@ -13,6 +15,13 @@ export class UIManager {
   private onSaveCallback: (() => void) | null = null;
   private onLoadCallback: (() => void) | null = null;
   private onResetCallback: (() => void) | null = null;
+  private onEvolutionToggleCallback: (() => void) | null = null;
+  private onBiomeChangeCallback: ((biome: BiomeType) => void) | null = null;
+  private onMusicToggleCallback: (() => void) | null = null;
+  private onSfxToggleCallback: (() => void) | null = null;
+  private onExportPoolCallback: (() => void) | null = null;
+  private onImportPoolCallback: (() => void) | null = null;
+  private showStats: boolean = false;
   
   constructor() {
     this.setupEventListeners();
@@ -63,6 +72,55 @@ export class UIManager {
         }
       }
     });
+    
+    // Evolution toggle button
+    const evolutionBtn = document.getElementById('evolution-toggle-btn');
+    evolutionBtn?.addEventListener('click', () => {
+      if (this.onEvolutionToggleCallback) {
+        this.onEvolutionToggleCallback();
+      }
+    });
+    
+    // Biome buttons
+    document.getElementById('biome-grassland-btn')?.addEventListener('click', () => {
+      if (this.onBiomeChangeCallback) this.onBiomeChangeCallback(BiomeType.GRASSLAND);
+    });
+    document.getElementById('biome-desert-btn')?.addEventListener('click', () => {
+      if (this.onBiomeChangeCallback) this.onBiomeChangeCallback(BiomeType.DESERT);
+    });
+    document.getElementById('biome-forest-btn')?.addEventListener('click', () => {
+      if (this.onBiomeChangeCallback) this.onBiomeChangeCallback(BiomeType.FOREST);
+    });
+    document.getElementById('biome-snow-btn')?.addEventListener('click', () => {
+      if (this.onBiomeChangeCallback) this.onBiomeChangeCallback(BiomeType.SNOW);
+    });
+    
+    // Audio toggle buttons
+    document.getElementById('music-toggle-btn')?.addEventListener('click', () => {
+      if (this.onMusicToggleCallback) this.onMusicToggleCallback();
+    });
+    document.getElementById('sfx-toggle-btn')?.addEventListener('click', () => {
+      if (this.onSfxToggleCallback) this.onSfxToggleCallback();
+    });
+    
+    // Multiplayer pool buttons
+    document.getElementById('export-pool-btn')?.addEventListener('click', () => {
+      if (this.onExportPoolCallback) this.onExportPoolCallback();
+    });
+    document.getElementById('import-pool-btn')?.addEventListener('click', () => {
+      if (this.onImportPoolCallback) this.onImportPoolCallback();
+    });
+    
+    // Stats toggle button
+    document.getElementById('toggle-stats-btn')?.addEventListener('click', () => {
+      this.showStats = !this.showStats;
+      const chartsDiv = document.getElementById('stats-charts');
+      const btn = document.getElementById('toggle-stats-btn');
+      if (chartsDiv && btn) {
+        chartsDiv.style.display = this.showStats ? 'block' : 'none';
+        btn.textContent = this.showStats ? 'Hide Charts' : 'Show Charts';
+      }
+    });
   }
   
   /**
@@ -98,6 +156,48 @@ export class UIManager {
    */
   onReset(callback: () => void): void {
     this.onResetCallback = callback;
+  }
+  
+  /**
+   * Register callback for evolution toggle
+   */
+  onEvolutionToggle(callback: () => void): void {
+    this.onEvolutionToggleCallback = callback;
+  }
+  
+  /**
+   * Register callback for biome change
+   */
+  onBiomeChange(callback: (biome: BiomeType) => void): void {
+    this.onBiomeChangeCallback = callback;
+  }
+  
+  /**
+   * Register callback for music toggle
+   */
+  onMusicToggle(callback: () => void): void {
+    this.onMusicToggleCallback = callback;
+  }
+  
+  /**
+   * Register callback for SFX toggle
+   */
+  onSfxToggle(callback: () => void): void {
+    this.onSfxToggleCallback = callback;
+  }
+  
+  /**
+   * Register callback for export pool
+   */
+  onExportPool(callback: () => void): void {
+    this.onExportPoolCallback = callback;
+  }
+  
+  /**
+   * Register callback for import pool
+   */
+  onImportPool(callback: () => void): void {
+    this.onImportPoolCallback = callback;
   }
   
   /**
@@ -238,5 +338,75 @@ export class UIManager {
     setTimeout(() => {
       notification.remove();
     }, 3000);
+  }
+  
+  /**
+   * Update statistics charts
+   */
+  updateStatsCharts(creatures: Creature[]): void {
+    if (!this.showStats) return;
+    
+    const chartsDiv = document.getElementById('stats-charts');
+    if (!chartsDiv) return;
+    
+    chartsDiv.innerHTML = `
+      ${StatsVisualizer.getStatsSummary(creatures)}
+      ${StatsVisualizer.createGenerationChart(creatures)}
+      ${StatsVisualizer.createTraitChart(creatures, 'size')}
+      ${StatsVisualizer.createTraitChart(creatures, 'speed')}
+    `;
+  }
+  
+  /**
+   * Update achievements display
+   */
+  updateAchievements(achievements: { id: string; name: string; description: string; unlocked: boolean }[]): void {
+    const achievementsDiv = document.getElementById('achievements-list');
+    if (!achievementsDiv) return;
+    
+    const unlockedCount = achievements.filter(a => a.unlocked).length;
+    
+    achievementsDiv.innerHTML = `
+      <div class="stat">${unlockedCount}/${achievements.length} Unlocked</div>
+      ${achievements.map(a => `
+        <div class="achievement ${a.unlocked ? 'unlocked' : ''}">
+          <strong>${a.name}</strong>
+          <div>${a.description}</div>
+        </div>
+      `).join('')}
+    `;
+  }
+  
+  /**
+   * Update evolution button state
+   */
+  updateEvolutionButton(enabled: boolean): void {
+    const btn = document.getElementById('evolution-toggle-btn');
+    if (btn) {
+      btn.textContent = enabled ? 'Stop Evolution' : 'Start Evolution';
+      btn.classList.toggle('active', enabled);
+    }
+  }
+  
+  /**
+   * Update music button state
+   */
+  updateMusicButton(enabled: boolean): void {
+    const btn = document.getElementById('music-toggle-btn');
+    if (btn) {
+      btn.textContent = enabled ? 'Music: On' : 'Music: Off';
+      btn.classList.toggle('active', enabled);
+    }
+  }
+  
+  /**
+   * Update SFX button state
+   */
+  updateSfxButton(enabled: boolean): void {
+    const btn = document.getElementById('sfx-toggle-btn');
+    if (btn) {
+      btn.textContent = enabled ? 'SFX: On' : 'SFX: Off';
+      btn.classList.toggle('active', enabled);
+    }
   }
 }
